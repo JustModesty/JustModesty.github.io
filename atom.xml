@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://justmodesty.github.io/</id>
     <title>Ji Jun Jie&apos;s Blog</title>
-    <updated>2019-06-28T13:41:56.168Z</updated>
+    <updated>2019-06-28T14:46:36.248Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://justmodesty.github.io/"/>
     <link rel="self" href="https://justmodesty.github.io//atom.xml"/>
@@ -11,38 +11,10 @@
     <icon>https://justmodesty.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Ji Jun Jie&apos;s Blog</rights>
     <entry>
-        <title type="html"><![CDATA[Redisabout]]></title>
-        <id>https://justmodesty.github.io//post/WFdQynK4i</id>
-        <link href="https://justmodesty.github.io//post/WFdQynK4i">
+        <title type="html"><![CDATA[mysql]]></title>
+        <id>https://justmodesty.github.io//post/1</id>
+        <link href="https://justmodesty.github.io//post/1">
         </link>
-        <updated>2019-06-28T13:41:20.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Golang]]></title>
-        <id>https://justmodesty.github.io//post/1dAISAyPY</id>
-        <link href="https://justmodesty.github.io//post/1dAISAyPY">
-        </link>
-        <updated>2019-06-28T13:41:06.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Python1]]></title>
-        <id>https://justmodesty.github.io//post/TDAq65rQC</id>
-        <link href="https://justmodesty.github.io//post/TDAq65rQC">
-        </link>
-        <updated>2019-06-28T13:40:48.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[MySQL]]></title>
-        <id>https://justmodesty.github.io//post/1JU3kAe2D</id>
-        <link href="https://justmodesty.github.io//post/1JU3kAe2D">
-        </link>
-        <updated>2019-06-28T13:40:27.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Linux操作系统]]></title>
-        <id>https://justmodesty.github.io//post/eIk40ojjw</id>
-        <link href="https://justmodesty.github.io//post/eIk40ojjw">
-        </link>
-        <updated>2019-06-28T13:36:16.000Z</updated>
+        <updated>2018-12-28T04:44:52.000Z</updated>
     </entry>
 </feed>

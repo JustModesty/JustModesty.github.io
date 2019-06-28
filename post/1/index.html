@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" >
 
-<title>MySQL | Ji Jun Jie&#39;s Blog</title>
+<title>mysql | Ji Jun Jie&#39;s Blog</title>
 <meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561729315384">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561733174469">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1561729315384" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1561733174469" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -47,25 +47,19 @@
       
         
           <a href="/archives" class="site-nav">
-            归档（历史记录）
+            归档
           </a>
         
       
         
           <a href="/tags" class="site-nav">
-            标签（文章分类）
+            标签
           </a>
         
       
         
           <a href="/post/about" class="site-nav">
             关于我
-          </a>
-        
-      
-        
-          <a href="/life" class="site-nav">
-            生活快乐小分享
           </a>
         
       
@@ -98,31 +92,53 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">MySQL</h2>
-            <div class="post-date">2019-06-28</div>
+            <h2 class="post-title">mysql</h2>
+            <div class="post-date">2018-12-28</div>
             
             <div class="post-content">
-              <p>day1</p>
+              <h1 id="sql的执行过程">SQL的执行过程</h1>
+<p>封面的图就是MySQL的基本架构示意图
+<img src="https://justmodesty.github.io//post-images/1561731699261.png" alt=""></p>
+<p>以最简单的SQL语句为例：</p>
+<pre><code>mysql&gt; select * from table_name where id=1;
+</code></pre>
+<h2 id="分层">分层</h2>
+<p>MySQL可分为两部分
+|</p>
+<ul>
+<li>Server层</li>
+<li>存储引擎层</li>
+</ul>
+<p>Server包括连接器、查询缓存、分析器、优化器、执行器等。
+作用：涵盖MySQL的大多数核心服务功能，以及所有的内置函数（如日期、时间、数学和加密函数等），所有跨存储的功能都在这一层实现，比如存储过程、触发器、视图等。</p>
+<p>存储引擎层的架构模式是插件式的，支持InnoDB（最常用，从MySQL5.5.5版本开始成为了默认的存储引擎）、MyISAM、Memory等多个存储引擎。
+作用：负责数据的存储和提取。</p>
+<p><strong>不同的存储引擎共用一个Server层。</strong></p>
+<h3 id="server层的各个组件">Server层的各个组件</h3>
+<h4 id="连接器">连接器</h4>
+<p>连接器负责跟客户端建立连接、获取权限、维持和管理连接。
+常见的连接命令：</p>
+<pre><code>mysql -h$ip -P$port -u$user -p
+</code></pre>
+<p><strong>注意在生产服务器中不要在-p后面输入密码（可能会导致密码泄露），而要在交互对话里面输入密码</strong></p>
+<p>连接命令中的mysql是客户端工具，用来跟服务端建立连接。在TCP握手后，连接器就开始认证客户端身份。</p>
+<ol>
+<li>if :用户名或密码不对
+客户端会收到&quot;Access denied for user&quot;，然后客户端程序结束执行</li>
+<li>else:
+连接器会到权限表里面查出用户拥有的权限。之后，这个连接里面的权限判断逻辑，都将依赖于此时读到的权限（所以，一个用户成功建立连接后，即使管理员用户对该用户的权限做了修改，也不会影响已经存在连接的权限。修改完成后，只有再新建的连接才会使用新的权限设置。）</li>
+</ol>
 
             </div>
             
               <div class="tag-container">
                 
-                  <a href="https://justmodesty.github.io//tag/IoT8pm7Zx" class="tag">
+                  <a href="https://justmodesty.github.io//tag/mysql" class="tag">
                     MySQL
                   </a>
                 
               </div>
             
-            
-              <div class="next-post">
-                <div class="next">下一篇</div>
-                <a href="https://justmodesty.github.io//post/eIk40ojjw">
-                  <h3 class="post-title">
-                    Linux操作系统
-                  </h3>
-                </a>
-              </div>
             
 
             
