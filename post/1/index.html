@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561769121052">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561773690606">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1561769121052" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1561773690606" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -100,8 +100,7 @@
             
             <div class="post-content">
               <h1 id="sql的执行过程">SQL的执行过程</h1>
-<p>封面的图就是MySQL的基本架构示意图
-<img src="https://justmodesty.github.io//post-images/1561769010090.png" alt=""></p>
+<p>封面的图就是MySQL的基本架构示意图</p>
 <p>以最简单的SQL语句为例：</p>
 <pre><code>mysql&gt; select * from table_name where id=1;
 </code></pre>
@@ -125,12 +124,11 @@
 </code></pre>
 <p><strong>注意在生产服务器中不要在-p后面输入密码（可能会导致密码泄露），而要在交互对话里面输入密码</strong></p>
 <p>连接命令中的mysql是客户端工具，用来跟服务端建立连接。在TCP握手后，连接器就开始认证客户端身份。</p>
-<ol>
-<li>if :用户名或密码不对
-客户端会收到&quot;Access denied for user&quot;，然后客户端程序结束执行</li>
-<li>else:
-连接器会到权限表里面查出用户拥有的权限。之后，这个连接里面的权限判断逻辑，都将依赖于此时读到的权限（所以，一个用户成功建立连接后，即使管理员用户对该用户的权限做了修改，也不会影响已经存在连接的权限。修改完成后，只有再新建的连接才会使用新的权限设置。）</li>
-</ol>
+<pre><code>if :用户名或密码不对
+	客户端会收到&quot;Access denied for user&quot;，然后客户端程序结束执行
+else:
+	连接器会到权限表里面查出用户拥有的权限。之后，这个连接里面的权限判断逻辑，都将依赖于此时读到的权限（所以，一个用户成功建立连接后，即使管理员用户对该用户的权限做了修改，也不会影响已经存在连接的权限。修改完成后，只有再新建的连接才会使用新的权限设置。）
+</code></pre>
 <p>连接成功后，如果没有后续的动作，这个连接就处于空闲状态，可以通过show processlist命令查看。
 <img src="https://justmodesty.github.io//post-images/1561767856385.png" alt="">
 Command列显示为&quot;Sleep&quot;表示系统里面有一个空闲连接，如果客户端长时间没动静，连接器就会自动断开（由wait_timeout控制，默认是8小时）。在连接被断开之后，客户端再次发送请求的时候会收到一个错误提醒：Lost connection to MySQL server during query。此时只能重新连接再执行请求。</p>
@@ -143,6 +141,59 @@ Command列显示为&quot;Sleep&quot;表示系统里面有一个空闲连接，�
 解决方案：
 1.定期断开长连接。使用一段时间，或者程序里面判断执行过一个占用内存的大查询后，断开连接，需要查询的时候再重连。
 2.（对于MySQL5.7及以上版本）在每次执行一个大操作后，通过执行mysql_reset_connection来重新初始化连接资源。这个过程不需要重连和重新做权限验证，会将连接回复到刚刚创建完时的状态。</p>
+<h4 id="查询缓存mysql80版本没有这个功能了">查询缓存(MySQL8.0版本没有这个功能了）</h4>
+<p>建立连接后执行select语句：
+之前执行过的语句及结果可能会以key-value的形式被直接缓存在内存中。
+key：查询的语句
+value：查询的结果</p>
+<pre><code>if 查询语句在缓存key中:
+	得到结果value
+	if 用户通过权限验证:
+		return 直接将value返回给客户端。
+	elif 用户没有通过权限:
+		return 返回权限错误
+else:
+	继续后面的执行阶段
+	执行完成后，执行结果存入查询缓存中
+</code></pre>
+<p><strong>大多数情况下不要使用查询缓存</strong>
+只要对一个表有更新，这个表上的所有查询缓存都会清空。可能还没用到缓存，这个缓存就被清空了，对于更新频繁的数据库，查询缓存的命中率会非常低。业务中的静态表（比如系统配置表），才适合使用查询缓存。</p>
+<p>可以在MySQL中将参数query_cache_type设置成DEMAND，这样对于默认的SQL语句都不使用查询缓存。对于要使用查询缓存的语句，可以用SQL_CACHE显示指定：</p>
+<pre><code>mysql&gt; select SQL_CACHE * frome table_name where id=1;
+</code></pre>
+<h4 id="分析器">分析器</h4>
+<p>没有命中查询缓存，则开始真正执行语句。
+在所有步骤之前先调用precheck验证权限
+步骤：</p>
+<ol>
+<li>“词法分析”。MySQL识别出SQL语句中的字符串分别是什么，代表什么。简单地说就是关键字识别、名称识别。（收到Oracle影响颇深，Oracle会在分析阶段判断语句是否正确，表是否存在，列是否存在。MySQL也是这样）</li>
+<li>“语法分析”。根据“词法分析”的结果，语法分析器会根据语法规则，判断输入的这个SQL语句是否满足MySQL语法。</li>
+</ol>
+<pre><code>if 满足SQL语法：
+	进行下一步
+else:
+	客户端将接受到“You have an error in your SQL syntax”+错误提醒（第一个出现错误的位置）
+</code></pre>
+<h4 id="优化器">优化器</h4>
+<p>分析器之后，进入优化器
+作用：
+在表里有多个索引的时候，决定使用哪个索引；
+在一个语句有多表关联的时候，决定各个表的连接顺序；</p>
+<h4 id="执行器">执行器</h4>
+<p>优化器之后，进入执行器</p>
+<pre><code>if 用户有查询权限:
+	打开表继续执行。（执行器会根据表的引擎定义，去使用这个引擎提供的接口）
+	比如 select * from table_name where id=100;
+	执行器调用InnoDB引擎接口去取这个表的第一行
+	判断  if id==100:
+							将这行存在结果集中
+					 else:
+						 调用存储接口取下一行，重复相同的判断逻辑，知道渠道这个表的最后一行。
+					 return 执行器将上述便利过程中所有满足条件的行组成的记录集作为结果集返回给客户端。
+*在数据库的慢查询日志中有一个rowsexamined的字段，表示这个语句执行过程中扫描了多少行。这个值就是在执行器每次调用存储引擎获取数据行的时候累加的。*
+else:
+	返回权限错误
+</code></pre>
 
             </div>
             
