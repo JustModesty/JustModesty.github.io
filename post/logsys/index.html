@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" >
 
-<title>Ubuntu在终端打开文件夹 | Ji Jun Jie&#39;s Blog</title>
+<title>MySQL日志系统 | Ji Jun Jie&#39;s Blog</title>
 <meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -92,24 +92,72 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">Ubuntu在终端打开文件夹</h2>
-            <div class="post-date">2018-11-13</div>
+            <h2 class="post-title">MySQL日志系统</h2>
+            <div class="post-date">2019-01-03</div>
             
             <div class="post-content">
-              <p>nautilus, 直接打开Home
-nautilus . 打开当前文件夹
-nautilus [path] 打开path路径文件夹</p>
+              <h2 id="日志模块redo-log重做日志">日志模块:redo log（重做日志）</h2>
+<p>MySQL里有一个问题：如果每一次的更新操作都要写进磁盘，然后磁盘也要找到对应的那条记录，然后再更新，整个过程IO成本、查找成本都很高。由此引如了<strong>WAL技术</strong></p>
+<h4 id="wal技术-write-ahead-logging">WAL技术 （Write-Ahead Logging)</h4>
+<p>它的关键点就是先写日志，再写磁盘。
+当有一条记录需要更新时，InnoDB引擎就会先把记录写到redo log里面，并更新内存，这个时候更新就算完成了。同时，InnoDB引擎会在适当的时候，将这个操作记录更新到磁盘里面，而这个更新往往是在系统比较空闲的时候做。InnoDB的redo log是固定大小的，比如可以配置一组4个文件，每个文件的大小是1GB，那么总共可以记录4GB的操作。从头开始写，写到末尾又回到开头循环写，如下所示。
+<img src="https://justmodesty.github.io//post-images/1561775004715.png" alt="">
+write pos：当前记录的位置
+check point：当前要擦除的位置，擦除记录前要把记录更新到数据文件
+绿色部分就是还可以用来记录新的操作的空间。如果write pos 追上了 check point，则这时候不能再执行新的更新，需要先停下来更新check point的位置。</p>
+<h4 id="redo-log的作用">redo log的作用</h4>
+<p>有了redo log,InnoDB就可以保证即使数据库发生异常重启，之前提交的记录都不会丢失，这个能力称为crash-safe。即可以通过日志和磁盘得到数据的数据和状态</p>
+<p><strong>redo log是InnoDB引擎特有的日志，位于引擎层</strong></p>
+<h2 id="日志模块binlog归档日志">日志模块:binlog（归档日志）</h2>
+<p><strong>binlog是Server层的日志</strong>
+因为MySQL自带的引擎是MyISAM（一开始没有InnoDB)，但是MyISAM没有crash-safe的能力，所以binlog日志只能用于归档。</p>
+<h2 id="两种日志的不同点">两种日志的不同点</h2>
+<table>
+<thead>
+<tr>
+<th>-</th>
+<th>redo log</th>
+<th>binlog</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>支持的引擎</td>
+<td>InnoDB</td>
+<td>所有引擎(因为是基于Server层的)</td>
+</tr>
+<tr>
+<td>日志类型</td>
+<td>物理日志(记录的是&quot;在某个数据页上做了什么修改&quot;)</td>
+<td>逻辑日志（&quot;记录的是这个语句的原始逻辑&quot;,比如给id=10这一行的c字段加/减1）</td>
+</tr>
+<tr>
+<td>写入方式</td>
+<td>循环写入(空间固定会用完)</td>
+<td>追加写入(写到一定大小后会切换到下一个，不会覆盖以前的日志)</td>
+</tr>
+</tbody>
+</table>
 
             </div>
             
               <div class="tag-container">
                 
-                  <a href="https://justmodesty.github.io//tag/memo" class="tag">
-                    Memo
+                  <a href="https://justmodesty.github.io//tag/mysql" class="tag">
+                    MySQL
                   </a>
                 
               </div>
             
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/process">
+                  <h3 class="post-title">
+                    mysql基础架构
+                  </h3>
+                </a>
+              </div>
             
 
             
