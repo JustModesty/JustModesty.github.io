@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561733174469">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561768785849">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1561733174469" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1561768785849" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -128,6 +128,18 @@
 <li>else:
 连接器会到权限表里面查出用户拥有的权限。之后，这个连接里面的权限判断逻辑，都将依赖于此时读到的权限（所以，一个用户成功建立连接后，即使管理员用户对该用户的权限做了修改，也不会影响已经存在连接的权限。修改完成后，只有再新建的连接才会使用新的权限设置。）</li>
 </ol>
+<p>连接成功后，如果没有后续的动作，这个连接就处于空闲状态，可以通过show processlist命令查看。
+<img src="https://justmodesty.github.io//post-images/1561767856385.png" alt="">
+Command列显示为&quot;Sleep&quot;表示系统里面有一个空闲连接，如果客户端长时间没动静，连接器就会自动断开（由wait_timeout控制，默认是8小时）。在连接被断开之后，客户端再次发送请求的时候会收到一个错误提醒：Lost connection to MySQL server during query。此时只能重新连接再执行请求。</p>
+<p>关于<strong>长连接</strong>和<strong>短连接</strong>：</p>
+<ul>
+<li>长连接是指连接成功后，如果客户端持续有请求，则一直使用同一个连接。（建议使用长连接，因为建立连接的过程比较复杂，要尽量减少建立连接的动作）</li>
+<li>短连接是指每次执行完很少的几次查询就断开连接，下次查询再重新建立一个。</li>
+</ul>
+<p>全部使用长连接的缺点：MySQL占用内存会很多，因为MySQL在执行过程中临时使用的内存是管理在连接对象里面的。这些资源会在连接断开的时候才释放。如果长连接累积下来，可能会由于内存占用太大被系统强行杀掉（OOM）---也就是MySQL异常重启。
+解决方案：
+1.定期断开长连接。使用一段时间，或者程序里面判断执行过一个占用内存的大查询后，断开连接，需要查询的时候再重连。
+2.（对于MySQL5.7及以上版本）在每次执行一个大操作后，通过执行mysql_reset_connection来重新初始化连接资源。这个过程不需要重连和重新做权限验证，会将连接回复到刚刚创建完时的状态。</p>
 
             </div>
             
@@ -139,6 +151,15 @@
                 
               </div>
             
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/forgetpasswd">
+                  <h3 class="post-title">
+                    ubuntu下忘记mysql5.7账号密码
+                  </h3>
+                </a>
+              </div>
             
 
             

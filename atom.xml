@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://justmodesty.github.io/</id>
     <title>Ji Jun Jie&apos;s Blog</title>
-    <updated>2019-06-28T14:46:36.248Z</updated>
+    <updated>2019-06-29T00:39:58.093Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://justmodesty.github.io/"/>
     <link rel="self" href="https://justmodesty.github.io//atom.xml"/>
@@ -16,5 +16,19 @@
         <link href="https://justmodesty.github.io//post/1">
         </link>
         <updated>2018-12-28T04:44:52.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ubuntu下忘记mysql5.7账号密码]]></title>
+        <id>https://justmodesty.github.io//post/forgetpasswd</id>
+        <link href="https://justmodesty.github.io//post/forgetpasswd">
+        </link>
+        <updated>2018-12-03T00:18:59.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Ubuntu在终端打开文件夹]]></title>
+        <id>https://justmodesty.github.io//post/openfile</id>
+        <link href="https://justmodesty.github.io//post/openfile">
+        </link>
+        <updated>2018-11-12T23:48:55.000Z</updated>
     </entry>
 </feed>
