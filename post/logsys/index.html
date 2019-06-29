@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561776493455">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561788452149">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1561776493455" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1561788452149" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -138,6 +138,26 @@ check point：当前要擦除的位置，擦除记录前要把记录更新到数
 </tr>
 </tbody>
 </table>
+<p>update语句的执行流程图如下，浅色框表示在InnoDB内部执行，深色框表示在执行器中执行：
+<img src="https://justmodesty.github.io//post-images/1561785251453.png" alt="">
+redo log的写入拆成了两个步骤：prepare和commit -------这就是<strong>两阶段提交</strong></p>
+<h3 id="两阶段提交">两阶段提交</h3>
+<p>作用：可以让两份日志之间的逻辑一致。
+关于备份与数据库表误删之后的恢复过程：①首先找到最近的一次全量备份（整库备份），恢复到临时库②从备份的时间点开始，将备份的binlog依次取出来，重放到误操作之前的那个时刻。
+这样临时库就跟误删之前的线上库一样了，然后就可以把表数据从临时库取出来，按需要恢复到线上库去。
+两阶段提交的必要性就是保证数据库的备份是真实有效一致的。</p>
+<h5 id="如果不用两阶段提交">如果不用两阶段提交</h5>
+<ol>
+<li>
+<p>先写redo log, 再写binlog
+如果在写完redolog之后数据库crash了，由于redo log可以crash-save，系统崩溃之后仍然能够恢复数据回来，但是由于binlog没写完就crash了，这时候binlog里面就没有这个记录的语句。之后备份日志的时候，存起来的binlog里面就没有这条语句。重放binlog的时候临时库就会少了这一次更新，与原库不符。</p>
+</li>
+<li>
+<p>先写binlog, 再写redo log
+如果在写完binlog的时候数据库崩溃了，由于redolog还没写，崩溃之后不能恢复这个事务，但是由于binlog已经写了，在之后备份日志的时候，存起来的binlog就会有这条语句。重放binlog的时候临时库就会多了一次更新，与原库不符。</p>
+</li>
+</ol>
+<p>所以，如果不使用两阶段提交，那么数据库的状态就有可能和用它的日志恢复出来的库的状态不一致。两阶段提交就是让这两个状态保持逻辑上的一致。</p>
 
             </div>
             
