@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" >
 
-<title>Python的冷知识 | Ji Jun Jie&#39;s Blog</title>
+<title>NoSQL | Ji Jun Jie&#39;s Blog</title>
 <meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -91,68 +91,33 @@
 
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
-          <div class="post-detail">
-            <h2 class="post-title">Python的冷知识</h2>
-            <div class="post-date">2018-08-16</div>
-            
-            <div class="post-content">
-              <ol>
-<li>创建空列表的效率的区别
-empty_list_a = list()
-empty_list_b = []</li>
-</ol>
-<ul>
-<li>empty_list_a是来自一个函数调用，Python的function call会创建stack，并进行一系列参数检查的操作，消耗比较大。</li>
-<li>empty_list_b来自一个内置的C函数，可以直接被调用，效率更高。</li>
-</ul>
-<ol start="2">
-<li>在Python3.7+，字典被确定为有序（在3.6中，字典有序是一个implementation detail，在3.7才正式成为语言特性，因此3.6中无法100%保证有序性），3.6之前是无序的。</li>
-<li>字典和集合的工作原理（哈希表是怎样存储的）
-在老版本中，Python的哈希表结构如下：
-|-|哈希值 (hash)|键 (key) |值 (value)|
-|-|-|-|-|
-|0|hash0|key0|value0|
-|1|hash1|key1|value1|
-|2|hash2|key2|value2|
-这样会随着哈希表的扩张变得越来越稀疏。导致浪费很多存储空间。
-现在版本的Python哈希表除了字典本身的结构，会吧索引和哈希值、键、值 单独分开。</li>
-</ol>
-<p><strong>插入操作</strong></p>
-<p>每次向字典或集合插入一个元素时，Python会首先计算键的哈希值，再和mask=PyDicMinSize-1做与操作，计算这个元素应该插入哈希表的位置index = hash(key)&amp;mask。</p>
-<pre><code>if 这个位置index是空的：
-	这个元素会被插入其中
-else：
-	if 比较两个元素的哈希值和键相同,如果相同：
-		表明这个元素已经存在，如果值不同，如果值不同，则更新此值
-	elif 两者中有一个不相等：
-		此时就是哈希冲突，Python会继续寻找表中空余的位置，直到找到位置为止
-		寻找的方法有：（开放定址法、链地址法(拉链法)、再哈希法、建立公共溢出栈法）
-</code></pre>
-<p><strong>查找操作</strong></p>
-<p>与插入操作类似。</p>
-<pre><code>if 比较哈希表这个位置中元素的哈希值和键，与需要查找的元素是否相等，如果相等：
-	直接返回
-else：
-	继续查找，直到找到空位或者抛出异常为止。
-</code></pre>
-<p><strong>删除操作</strong></p>
-<p>Python会暂时对这个位置的元素赋于一个特殊的值，等到重新调整哈希表的大小时，再将其删除。</p>
-
-            </div>
-            
-              <div class="tag-container">
-                
-                  <a href="https://justmodesty.github.io//tag/python" class="tag">
-                    Python
-                  </a>
-                
+          <h2 class="current-tag">标签: NoSQL</h2>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://justmodesty.github.io//post/datamodel">
+                  <h2 class="post-title">NoSQL的不同数据模型</h2>
+                </a>
+                <div class="post-date">
+                  2019-06-29
+                </div>
+                <div class="post-abstract">
+                  
+                </div>
               </div>
-            
-            
+              
+                <a class="right" href="https://justmodesty.github.io//post/datamodel">
+                  <div class="feature-container" style="background-image: url('https://justmodesty.github.io//post-images/datamodel.png')">
+                  </div>
+                </a>
+              
+            </article>
+          
 
-            
-
-          </div>
+          <div class="pagination-container">
+  
+  
+</div>
 
         </div>
       </div>
