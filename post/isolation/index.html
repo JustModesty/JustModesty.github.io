@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561990549835">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561992356544">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1561990549835" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1561992356544" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -139,6 +139,21 @@
 <p>show variables like 'transaction_isolation';
 （Oracle默认是&quot;读提交&quot;，MySQL默认是“可重复读”，如果是从Oracle迁移过来的项目，要修改隔离级别）
 “可重复读”隔离级别下，事务启动时的视图可以认为是静态的，不受其他事务更新的影响。</p>
+<h1 id="事务隔离的实现">事务隔离的实现</h1>
+<p>MySQL每条记录在更新的时候都会同时记录一条回滚操作。记录上的<strong>最新值</strong>，通过回滚操作，都可以得到<strong>前一个</strong>状态的值。
+<img src="https://justmodesty.github.io//post-images/1561990882370.png" alt="">
+当前值是4，但是在查询这条记录的时候，不同时刻启动的事务会有不同的read-view。如图中看到的，在视图A、B、C里面，这一个记录的值分别是1、2、4。<strong>同一条记录在系统中可以存在多个版本，就是数据库的多版本并发控制（MVCC）。</strong> 对于read-view A，要得到1，就必须将当前值一次执行图中所有的回滚操作得到。</p>
+<h1 id="回滚日志什么时候删除">回滚日志什么时候删除</h1>
+<p>系统会判断，当没有事务在需要用到这些回滚日志时，也就是系统里没有比这个回滚日志更早的read-view的时候，回滚日志会被删除。</p>
+<h2 id="read-view是什么">read-view是什么？</h2>
+<p>read view其实就是一个保存事务ID的list列表。记录的是本事务执行时，MySQL还有哪些事务在执行。read view可以理解为事务开启时记录的快照。事务没提交进行回退时，按照undo回滚数据，就是回滚为生成read view时的数据。</p>
+<h1 id="为什么要避免使用长事务">为什么要避免使用长事务</h1>
+<p>长事务会造成系统里面保存很老的事务视图，由于这些视图随时可能访问数据库里面的任何数据，所以这个事务提交之前，数据库里面它可能用到的回滚记录都必须保留，这就会导致占用大量的存储空间。长事务还占用锁资源，可能拖垮整个库。</p>
+<h1 id="事务的启动方式">事务的启动方式</h1>
+<ol>
+<li>显示启动事务语句。通过begin/start transaction，配套commit提交语句/rollback回滚语句</li>
+<li>set autocommit=0,这个命令会将这个线程的自动提交关掉。如果只执行一个select语句，这个事务就启动了，而且并不会自动提交。这个事务持续存在直到程序员主动执行commit/rollback语句，或者断开连接。</li>
+</ol>
 
             </div>
             
