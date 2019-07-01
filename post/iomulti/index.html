@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>IO多路复用 | Ji Jun Jie&#39;s Blog</title>
+<meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561990549835">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://justmodesty.github.io/">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1561990549835" class="site-logo">
+        <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于本站
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构
+    </div>
+    <div class="site-footer">
+      a381654728@gmail.com | <a class="rss" href="https://justmodesty.github.io//atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">IO多路复用</h2>
+            <div class="post-date">2019-07-01</div>
+            
+            <div class="post-content">
+              <h1 id="io多路复用的概念">IO多路复用的概念</h1>
+<p>IO多路复用表示是使用一个线程/进程监听多个文件描述符的事件变化，当某个<strong>文件描述符</strong>的发生的状态是调用者感兴趣的状态时，通知调用者。</p>
+<h1 id="什么是文件描述符">什么是文件描述符</h1>
+<p>文件描述符形式上是一个非负整数，实际上表示的是一个索引值，指向操作系统内核为每个进程所打开的文件的记录表中的某条记录。Linux系统把所有的数据都看成是存储在文件中，文件描述符可以说是对这些数据的抽象。除了读写文件系统的文件，网络IO的数据读写区域也可以看成是一个文件。当一个进程同时服务多个socket连接时，操作系统就会为该进程的每个socket建立一个<strong>文件描述符（File Descriptor）</strong>，存储在该进程的进程信息表中。
+文件描述符的一般状态有：可读状态、可写状态。</p>
+<h1 id="如何在一个线程内监听多个文件描述符的状态变更">如何在一个线程内监听多个文件描述符的状态变更？</h1>
+<p>最古老最简单的方法是在单个线程内，不断向系统内核kernel轮询每个文件描述符的状态（每次查询都会进行一次系统调用）。由于每一次查询都要从用户态切换到内核态，非常低效，于是操作系统提供了多种方法使得一次系统调用即可监听多个文件描述符。（select、poll、epoll等）</p>
+<h2 id="select">select</h2>
+<h3 id="函数声明">函数声明</h3>
+<pre><code class="language-c">int select (int __nfds,
+           fd_set *__restrict __readfds,
+           fd_set *__restrict __writefds,
+           fd_set *__restrict __exceptfds,
+           struct timeval *__restrict __timeout);
+
+			其中 struct timeval{
+								long tv_sec; //秒
+								long tv_usec; //微秒
+							}
+</code></pre>
+<h3 id="参数解释">参数解释：</h3>
+<ul>
+<li>__nfds:最多判断多少个文件描述符；</li>
+<li>结构fd_set: 文件描述符的集合，本质是一个32位的矢量。默认大小为1024（0~1023的描述符）；该结构体有一些常用的方法，可以设置是否监听某个描述符
+void FD_SET(int fd, fd_set *fdset) //将fd对应的bit置为1
+void FD_ISSET(int fd, fd_set *fdset) //判断fd对应的bit是否为1，也就是fd是否就绪</li>
+<li>__readfds:简称readfds，需要监听的文件描述符集合。（关注点：是否可读）</li>
+<li>__writefds:简称writefds，需要监听的文件描述符集合。（关注点：是否可写）</li>
+<li>__exceptfd:简称exceptfd，需要监听的文件描述符集合。（关注点：是否发生异常，如文件描述符是否已经被删除）</li>
+<li>__timeout:系统调用的超时时间。如果为Null，则进程一直被阻塞至fd变更。</li>
+</ul>
+<h3 id="函数返回">函数返回</h3>
+<ul>
+<li>返回值：发生状态变更的fd数量。0表示超时，-1表示发生错误</li>
+</ul>
+<h3 id="使用方法的伪代码">使用方法的伪代码</h3>
+<pre><code class="language-c">// 监听文件描述符1，5的读状态
+fd_set *fs = new fd_set();
+FD_SET(1, fs);
+FD_SET(5, fs);
+timeval t = {3l, 0l}; // 超时时间为3s
+int cnt = select(2, fs, nil, nil, &amp;t);
+// 操作系统内核检查fd 1和5， 如果fd 1无数据，而fd 5有了（足够的）数据（即fd 5的状态变为可读），则将fs中的fd 5 设为1， 其他位置设为0。
+// 返回值cnt=1。
+if (cnt != 0) {
+  // 检查
+  if FD_ISSET(5, fs) {
+    do something with fd 5
+  }
+}
+</code></pre>
+<h3 id="select的缺点">select的缺点：</h3>
+<ul>
+<li>默认只能监听1024个文件描述符，对于一些高IO并发的进程而言完全不够用。</li>
+<li>每次系统调用完成fd_set都会被修改作为返回值，不可复用，需要重新构造一个fd_set。</li>
+</ul>
+<h2 id="poll">poll</h2>
+<p>poll解决了select只能监听1024个描述符的缺点（理论上poll可以监听无限多个描述符）
+函数声明如下：</p>
+<pre><code class="language-c">int poll (struct pollfd *__fds, nfds_t __nfds, int __timeout);
+其中：
+	struct pollfd {
+		int fd;                  // poll的文件描述符
+		short int events;        // poll关心的事件类型，时间类型有可读、可写、错误、挂起、无效fd等。使用mask来同时表示多个事件/状态
+		short int revents;       // 发生的事件类型，mask
+	};
+</code></pre>
+<h3 id="参数解释-2">参数解释</h3>
+<ul>
+<li>__fds:文件描述符结构体数组，理论上长度可以无限大。pollfd：存储文件描述符的结构体</li>
+<li>__nfds:最多判断多少个文件描述符，即只监听__fds[0]到__fds[__nfds-1];</li>
+<li>__timeout:系统调用的超时时间。如果为null，则进程一直阻塞直至有fd变更。</li>
+</ul>
+<h3 id="函数返回-2">函数返回</h3>
+<p>发生状态变更的fd数量。0表示超时，-1表示发生错误。</p>
+<h3 id="缺点">缺点：</h3>
+<p>虽然相较于select没有了监听数量限制。但是每次调用poll时，操作系统会修改__fds的文件描述符的状态events/revents,当再次调用poll时，还是需要新建或者修改__fds，毕竟上一次调用的__fds不能直接使用。</p>
+<h2 id="epoll">epoll</h2>
+<p>相较于poll，epoll将需要监听的文件描述符和监听结果分开，使得文件描述符列表可以重复使用。</p>
+<h3 id="函数声明-2">函数声明：</h3>
+<pre><code class="language-c">// 在系统内核创建一个epoll实例，返回该实例的句柄（可以理解为一个特殊文件描述符）。该实例可以监听__size个文件描述符
+int epoll_create (int __size);
+ 
+// __epfd为epoll_create返回的epoll句柄。
+// __op为操作，表示__fd的增(宏定义为1)、删（2）、改(3)；
+// __fd为需要监听的文件描述符；__event为感兴趣的事件
+// 函数返回：0表示操作成功，其他为失败
+int epoll_ctl (int __epfd, int __op, int __fd, struct epoll_event *__event);
+ 
+// 进行监听，等待内核返回。__epfd为epoll_create返回的epoll句柄。
+// __events: 链表，记录文件描述符及其事件类型。
+// __maxevents: 希望返回的最大的事件数量。
+// 函数返回：已经就绪的事件数量。（和select、poll不同，这二者返回的是就绪的文件描述符数量）
+int epoll_wait (int __epfd, struct epoll_event *__events, int __maxevents, int __timeout);
+</code></pre>
+<p>可以想象epoll实例对应的结构里面应该是包含了一个epoll_event列表，而epoll_event里面应该是包含了一个文件描述符以及一个表示事件类型的值。</p>
+<pre><code class="language-c">struct epoll_event {
+  uint32_t events;        // epoll事件
+  epoll_data_t data;    // 用户数据
+} __EPOLL_PACKED;
+ 
+// 用户数据
+typedef union epoll_data {
+  void *ptr;     // 可以用改指针指向自定义的参数
+  int fd;         // 可以用改成员指向epoll所监控的文件描述符
+  uint32_t u32;
+  uint64_t u64;
+} epoll_data_t;
+</code></pre>
+<p>由于epoll实例可以重复使用，因此一个epoll实例可以多用多次epoll_wait。</p>
+<pre><code class="language-c">int epoll = epoll_create (100);
+ 
+epoll_event *event = new(epoll_event);
+event-&gt;fd = 1; // 监听文件描述符1
+event-&gt;events = EPOLLIN; // EPOLLIN 表示有数据可读
+ 
+epoll_ctl (epoll, add, 1, event);
+while true {
+  // result存储就绪的fd及对应的事件类型
+  epoll_event *result = new(epoll_event);
+  int cnt = epoll_wait (epoll, result, 1, 10);
+  if (cnt &gt;= 1) {
+    遍历result链表，并对相应fd进行处理
+  }
+}
+</code></pre>
+<h2 id="select-poll-epoll对比">select、poll、epoll对比</h2>
+<ul>
+<li>select和poll监听一个fd列表，并将结果写入列表中。而epoll将fd列表和结果分开存储，使得fd列表可以重复使用</li>
+<li>select默认最多可以监听1024个fd，而poll、epoll没有限制</li>
+<li>对于select、poll，在监听过程中，内核都是使用遍历方法遍历文件描述符。而epoll采用类似事件驱动的机制。fd就绪会自动通知内核</li>
+<li>对于返回结果，select和poll都要遍历fd链表（因为其结果存储在fd链表中），而这个链表中的很多fd并无任何事件发生，因此浪费很多时间。而epoll由于将数据存储在另外一个链表中（函数epoll_wait的__events参数），因此__events里面的每个文件描述符都是就绪的，故对于监听结果的处理，epoll相对来说更为有效。</li>
+<li>三者本质都是同步阻塞调用</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://justmodesty.github.io//tag/os" class="tag">
+                    OS
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/datamodel">
+                  <h3 class="post-title">
+                    NoSQL的不同数据模型
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
