@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>索引 | Ji Jun Jie&#39;s Blog</title>
+<meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562069654749">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://justmodesty.github.io/">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562069654749" class="site-logo">
+        <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于本站
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构
+    </div>
+    <div class="site-footer">
+      a381654728@gmail.com | <a class="rss" href="https://justmodesty.github.io//atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">索引</h2>
+            <div class="post-date">2019-07-02</div>
+            
+            <div class="post-content">
+              <blockquote>
+<p><strong>写在最前：本文是博主在阅读“极客时间”MySQL实战后，博主的补充与总结，觉得林老师讲得还不错，这里仅作学习记录与分享。</strong></p>
+</blockquote>
+<h1 id="常见的三种索引模型">常见的三种索引模型</h1>
+<p><strong>哈希表、有序数组、搜索树</strong></p>
+<p>除了以上三种常见的，还有跳表、LSM树等数据结构也被用于引擎设计中。</p>
+<p>在MySQL中，索引是在<strong>存储引擎层</strong>实现的，并没有统一的索引标准，不同存储引擎的索引的工作方式不一样。而即使多个存储引擎支持同一种类型的索引，其底层的实现也可能不同。</p>
+<h2 id="哈希表">哈希表</h2>
+<p>哈希表适用于只有<strong>等值查询</strong>的场景，比如Memcached及其他一些NoSQL引擎</p>
+<p>使用哈希表的<strong>缺点</strong>：因为不是有序的，所以哈希索引做区间查询的速度是很慢的</p>
+<p>使用哈希表的<strong>优点</strong>：新增加记录的时候速度很快（就算有冲突，也能很快解决冲突）解决哈希冲突的一些方法：开放定址法、链地址法（拉链法）、再哈希法、建立公共溢出区等方法</p>
+<h2 id="有序数组">有序数组</h2>
+<p>有序数组适用于<strong>等值查询</strong>和<strong>范围查询</strong></p>
+<p>使用有序数组的<strong>缺点</strong>：往中间插入一条记录就必须挪动后面的所有记录，消耗时间太高。</p>
+<p>使用有序数组的<strong>优点</strong>：查找速度快，用二分法O(log(N))就可以快速找到记录</p>
+<p><strong>有序数组索引只适用于静态存储引擎</strong>：保存的数据是不会再变化的，比如往年的人口信息数据等。</p>
+<h2 id="搜索树">搜索树</h2>
+<p>在InnoDB中，<strong>表</strong>都是根据<strong>主键顺序</strong>以索引的形式存放的，这种存储方式的表称为<strong>索引组织表</strong>。</p>
+<p><strong>每一个索引在InnoDB里面对应一棵B+树。</strong></p>
+<pre><code class="language-mysql"># 假设我们有一个主键列为ID的表，表中有字段k，并且在k上有索引
+mysql&gt; create table T(
+id int primary key, 
+k int not null, 
+name varchar(16),
+index (k))engine=InnoDB;
+
+</code></pre>
+<p>表中1~5行的(ID,k)值分别为(100,1)、(200,2)、(300,3)、(500,5)、(600,6)，两棵树的示意图如下：</p>
+<p><img src="https://justmodesty.github.io//post-images/1562069630916.png" alt=""></p>
+<p>从图中看出，根据叶子节点的内容，索引类型分为<strong>主键索引</strong>和<strong>非主键索引</strong>。</p>
+<p><strong>主键索引</strong>的<strong>叶子节点</strong>存的是<strong>整行数据</strong>，在InnoDB里，主键索引也叫<strong>聚簇索引（clustered index）</strong>.</p>
+<p><strong>非主键索引</strong>的<strong>叶子节点</strong>内容是<strong>主键的值</strong>，在InnoDB里，非主键索引也叫<strong>二级索引（secondary index）</strong></p>
+<h2 id="主键索引查询和非主键索引查询有什么区别">主键索引查询和非主键索引查询有什么区别？</h2>
+<ul>
+<li>select * from T where ID=10,就是主键索引查询，只需要搜索ID这棵B+树；</li>
+<li>select * from T where k=5,就是普通索引查询，则需要先搜索k索引树，得到ID的值为500，再到ID索引树搜索一次。这个过程称为<strong>回表</strong>。</li>
+</ul>
+<p>所以应该尽量使用<strong>主键查询</strong></p>
+<h2 id="为什么需要自增主键">为什么需要自增主键？</h2>
+<p>如果不使用自增主键，在添加记录的时候，可能会存在<strong>页分裂</strong>（页分裂指记录所在的数据页已经满了，根据B+树的算法，申请一个新的数据页，然后挪动部分数据页过去。这会造成性能大受影响）</p>
+<p>从<strong>性能</strong>来看：<strong>自增主键的的插入是追加操作，不涉及到挪动其他记录，所以不会触发叶子节点的分裂。</strong></p>
+<p>而有业务逻辑的字段做主键，往往不容易保证有序插入，这样写数据成本相对较高。</p>
+<p>从<strong>存储空间</strong>来看： 如果有唯一标识，如身份证号，还需要另加自增主键作索引吗？</p>
+<p>用整型做主键主要4个字节，如果是长整型，则是8个字节，如果用身份证做索引则要20个字节左右。而且可能还存在非主键列，则非主键列的叶子节点保存了主键的值（20个字节），非常占用空间！</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://justmodesty.github.io//tag/mysql" class="tag">
+                    MySQL
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/iomulti">
+                  <h3 class="post-title">
+                    IO多路复用
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
