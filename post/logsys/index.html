@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1561992356544">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562045850289">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1561992356544" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562045850289" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -96,7 +96,10 @@
             <div class="post-date">2019-01-03</div>
             
             <div class="post-content">
-              <h2 id="日志模块redo-log重做日志">日志模块:redo log（重做日志）</h2>
+              <blockquote>
+<p><strong>写在最前：本文是博主在阅读“极客时间”MySQL实战的基础上的总结与补充，觉得林老师讲得还不错，这里仅作学习记录与分享。</strong></p>
+</blockquote>
+<h2 id="日志模块redo-log重做日志">日志模块:redo log（重做日志）</h2>
 <p>MySQL里有一个问题：如果每一次的更新操作都要写进磁盘，然后磁盘也要找到对应的那条记录，然后再更新，整个过程IO成本、查找成本都很高。由此引如了<strong>WAL技术</strong></p>
 <h4 id="wal技术-write-ahead-logging">WAL技术 （Write-Ahead Logging)</h4>
 <p>它的关键点就是先写日志，再写磁盘。
