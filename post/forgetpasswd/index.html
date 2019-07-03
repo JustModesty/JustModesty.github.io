@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" >
 
-<title>ubuntu下忘记mysql5.7账号密码 | Ji Jun Jie&#39;s Blog</title>
+<title>平时的备忘小技巧 | Ji Jun Jie&#39;s Blog</title>
 <meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562116015867">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562116295371">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1562116015867" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562116295371" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -92,13 +92,26 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">ubuntu下忘记mysql5.7账号密码</h2>
-            <div class="post-date">2018-12-03</div>
+            <h2 class="post-title">平时的备忘小技巧</h2>
+            <div class="post-date">2019-04-09</div>
+            
+              <div class="feature-container" style="background-image: url('https://justmodesty.github.io//post-images/forgetpasswd.jpg')">
+              </div>
             
             <div class="post-content">
-              <p>cd /etc/mysql
+              <h1 id="ubuntu下忘记mysql57账号密码">ubuntu下忘记mysql5.7账号密码</h1>
+<p>cd /etc/mysql
 sudo cat debian.cnf
 通过里面的user password即可进入mysql,然后再通过该账号修改密码或创建新账号</p>
+<h1 id="如何从github上下载单个文件">如何从github上下载单个文件</h1>
+<p>首先获取raw地址path：然后 curl -O path 或者 wget path
+例如：
+curl -O https://raw.githubusercontent.com/python/cpython/master/Objects/tupleobject.c
+wget https://raw.githubusercontent.com/python/cpython/master/Objects/listobject.c</p>
+<h1 id="ubuntu在终端打开文件夹">ubuntu在终端打开文件夹</h1>
+<p>nautilus, 直接打开Home
+nautilus . 打开当前文件夹
+nautilus [path] 打开path路径文件夹</p>
 
             </div>
             
@@ -113,9 +126,9 @@ sudo cat debian.cnf
             
               <div class="next-post">
                 <div class="next">下一篇</div>
-                <a href="https://justmodesty.github.io//post/openfile">
+                <a href="https://justmodesty.github.io//post/logsys">
                   <h3 class="post-title">
-                    Ubuntu在终端打开文件夹
+                    MySQL日志系统
                   </h3>
                 </a>
               </div>
