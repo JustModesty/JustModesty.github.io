@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" >
 
-<title>Tornado原理初窥 | Ji Jun Jie&#39;s Blog</title>
+<title>Tornado源码初窥 | Ji Jun Jie&#39;s Blog</title>
 <meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562115545456">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562115668159">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1562115545456" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562115668159" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -92,15 +92,14 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">Tornado原理初窥</h2>
+            <h2 class="post-title">Tornado源码初窥</h2>
             <div class="post-date">2019-07-03</div>
             
               <div class="feature-container" style="background-image: url('https://justmodesty.github.io//post-images/tornado.png')">
               </div>
             
             <div class="post-content">
-              <h1 id="tornado源码初窥">Tornado源码初窥</h1>
-<blockquote>
+              <blockquote>
 <p>**写在最前：参考阅读：<a href="https://www.cnblogs.com/chenchao1990/p/5406245.html">https://www.cnblogs.com/chenchao1990/p/5406245.html</a> **</p>
 <p><strong>本文是博主结合自己对tornado的认识对参考阅读的总结与补充，在此作学习记录与分享。</strong></p>
 </blockquote>
