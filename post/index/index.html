@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562069654749">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562115545456">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1562069654749" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562115545456" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -135,8 +135,9 @@ index (k))engine=InnoDB;
 </ul>
 <p>所以应该尽量使用<strong>主键查询</strong></p>
 <h2 id="为什么需要自增主键">为什么需要自增主键？</h2>
-<p>如果不使用自增主键，在添加记录的时候，可能会存在<strong>页分裂</strong>（页分裂指记录所在的数据页已经满了，根据B+树的算法，申请一个新的数据页，然后挪动部分数据页过去。这会造成性能大受影响）</p>
-<p>从<strong>性能</strong>来看：<strong>自增主键的的插入是追加操作，不涉及到挪动其他记录，所以不会触发叶子节点的分裂。</strong></p>
+<p>如果不使用自增主键，在添加记录的时候，可能会存在<strong>页分裂</strong>（页分裂指记录所在的数据页已经满了，根据B+树的算法，申请一个新的数据页，然后挪动部分数据页过去。这会造成性能大受影响）
+<em>（页分裂这里有可能需要重建索引）</em>
+从<strong>性能</strong>来看：<strong>自增主键的的插入是追加操作，不涉及到挪动其他记录，所以不会触发叶子节点的分裂。</strong></p>
 <p>而有业务逻辑的字段做主键，往往不容易保证有序插入，这样写数据成本相对较高。</p>
 <p>从<strong>存储空间</strong>来看： 如果有唯一标识，如身份证号，还需要另加自增主键作索引吗？</p>
 <p>用整型做主键主要4个字节，如果是长整型，则是8个字节，如果用身份证做索引则要20个字节左右。而且可能还存在非主键列，则非主键列的叶子节点保存了主键的值（20个字节），非常占用空间！</p>

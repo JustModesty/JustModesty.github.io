@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Tornado原理初窥 | Ji Jun Jie&#39;s Blog</title>
+<meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562115545456">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://justmodesty.github.io/">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562115545456" class="site-logo">
+        <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于本站
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构
+    </div>
+    <div class="site-footer">
+      a381654728@gmail.com | <a class="rss" href="https://justmodesty.github.io//atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Tornado原理初窥</h2>
+            <div class="post-date">2019-07-03</div>
+            
+              <div class="feature-container" style="background-image: url('https://justmodesty.github.io//post-images/tornado.png')">
+              </div>
+            
+            <div class="post-content">
+              <h1 id="tornado源码初窥">Tornado源码初窥</h1>
+<blockquote>
+<p>**写在最前：参考阅读：<a href="https://www.cnblogs.com/chenchao1990/p/5406245.html">https://www.cnblogs.com/chenchao1990/p/5406245.html</a> **</p>
+<p><strong>本文是博主结合自己对tornado的认识对参考阅读的总结与补充，在此作学习记录与分享。</strong></p>
+</blockquote>
+<p><img src="https://justmodesty.github.io//post-images/1562115507639.png" alt=""></p>
+<p>图中有八大模块：</p>
+<ol>
+<li>Application</li>
+<li>IOLoop</li>
+<li>HTTPServer</li>
+<li>IOStream</li>
+<li>HTTPConnection</li>
+<li>HTTPRequest</li>
+<li>Application</li>
+<li>XXXRequestHandler</li>
+</ol>
+<h1 id="tornado在启动之后做了些什么">Tornado在启动之后做了些什么？</h1>
+<ul>
+<li>程序启动阶段：</li>
+</ul>
+<ol>
+<li>生成路由规则映射(获取配置文件然后生成url映射，一个url对应一个XXXRequestHandler处理方法，从而让XXXRequestHandler来处理指定url发送的请求)</li>
+<li>创建socket_server，然后将句柄添加到epoll</li>
+<li>while无限循环，不断监听epoll，当epoll中句柄变化时，执行相应的函数</li>
+</ol>
+<ul>
+<li>接受并处理请求阶段：</li>
+</ul>
+<ol start="4">
+<li>接收客户端socket发送的请求(socket.accept)；</li>
+<li>从请求中获取请求头信息，然后根据请求头中的请求url去匹配某个XXXRequestHandler;</li>
+<li>匹配成功的XXXRequestHandler处理请求</li>
+<li>将处理后的请求发送给客户端</li>
+<li>关闭客户端socket</li>
+</ol>
+<h2 id="程序启动阶段">程序启动阶段</h2>
+<p>主要是三个方法：</p>
+<pre><code class="language-python">import tornado.ioloop
+import tornado.web
+ 
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write(&quot;Hello, world&quot;)
+ 
+application = tornado.web.Application([
+    (r&quot;/index&quot;, MainHandler),
+])
+ 
+if __name__ == &quot;__main__&quot;:
+    application.listen(8888)
+    tornado.ioloop.IOLoop.instance().start()
+</code></pre>
+<ol>
+<li>
+<p>application=tornado.web.Application([</p>
+<p>(正则匹配路径1,处理方法1),</p>
+<p>(正则匹配路径2,处理方法2),</p>
+<p>(正则匹配路径3,处理方法3),</p>
+<p>...</p>
+<p>])</p>
+</li>
+<li>
+<p>application.listen(端口号)</p>
+</li>
+<li>
+<p>tornado.ioloop.IOLoop.instance().start()</p>
+</li>
+</ol>
+<h2 id="application-tornadowebapplication">application = tornado.web.Application([(),(),...,()])</h2>
+<blockquote>
+<p><strong>如果想看代码一行一行的分析，可以去参考最上面引用的博文。</strong></p>
+<p><strong>下面是博主自己在框架中看class Application源码后的一些总结与分享</strong></p>
+<pre><code># 以下源码基于（依赖于）：
+tornado==4.0
+torndb==0.2
+</code></pre>
+</blockquote>
+<ol>
+<li>
+<p>首先点进源码里：可以看到类的声明class Application(httputil.HTTPServerConnectionDelegate) 其中Application继承于httputil.HTTPServerConnectionDElegate，看名字大概猜到是一个http的工具，主要是HTTP服务器连接功能，这个父类我们后面再探究。</p>
+</li>
+<li>
+<p>这个有11个方法（包含重写的方法）</p>
+<pre><code class="language-python">def __init__(self, handlers=None, default_host=&quot;&quot;, transforms=None,**settings):
+    # 这个构造器接收一个'URLSpec'列表对象或者(regexp, request_class)元组。
+    # 当接收到requests的时候，顺序遍历整个列表并且为匹配到regexp的第一个request初始化一个实例request class
+    # 这个request class可以是一个类，也可以是一个名字
+    # 另外值得一提的是，这个元祖也可以在第三个位置放字典类型的参数，这个字典会作为handler的构造器的keyword参数和'~RequestHandler.initialize'方法的参数。这种例子用于'StaticFileHandler'如下：
+    # application = web.Application([
+    #       (r&quot;/static/(.*)&quot;, web.StaticFileHandler, {&quot;path&quot;: &quot;/var/www&quot;}),
+    #   ])
+    # 省略代码
+    pass
+def listen(self, port, address=&quot;&quot;, **kwargs):
+    # 为这个application在指定端口开启一个HTTP服务器。
+    # 在此之后需要调用`IOLoop.instance().start()`去配套开启这个服务器
+    # 省略代码
+    pass
+def add_handlers(self, host_pattern, host_handlers):
+    # 追加一个指定的handler到handlers列表里（就是上面__init__的那个）
+    # 省略代码
+    pass
+def add_transform(self, transform_class):
+    # 省略代码
+    pass
+def _get_host_handlers(self, request):
+    # 省略代码
+    pass
+def _load_ui_methods(self, methods):
+    # 省略代码
+    pass
+def _load_ui_modules(self, modules):
+    # 省略代码
+    pass
+def start_request(self, connection):
+    # 新版的HTTPServer接口
+    # 省略代码
+    pass
+def __call__(self, request):
+    # 旧版的HTTPServer接口
+    # 省略代码
+    pass
+def reverse_url(self,name, *args):
+    # 返回一个 URL 的path
+    if name in self.named_handlers:
+        return self.named_handlers[name].reverse(*args)
+    raise KeyError(&quot;%s not found in named urls&quot; % name)
+    
+def log_request(self, handlers):
+    # 把完整的HTTP request写入日志里面
+    # 默认是写到Python root logger。要改这个的话要去子类里覆盖这个方法，要么就传一个log_function到application settings dictionary里
+    # 省略代码
+    pass
+</code></pre>
+</li>
+</ol>
+<h1 id="未完待续20190703">未完待续...2019.07.03</h1>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://justmodesty.github.io//tag/python" class="tag">
+                    Python
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/index">
+                  <h3 class="post-title">
+                    索引
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
