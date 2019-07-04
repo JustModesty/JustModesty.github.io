@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562199453335">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562199804687">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1562199453335" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562199804687" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -104,7 +104,7 @@
 </blockquote>
 <h1 id="sql的执行过程">SQL的执行过程</h1>
 <p>封面的图就是MySQL的基本架构示意图
-<img src="https://justmodesty.github.io//post-images/1562116003474.png" alt=""></p>
+<img src="https://justmodesty.github.io//post-images/1562199757253.webp" alt=""></p>
 <p>以最简单的SQL语句为例：</p>
 <pre><code>mysql&gt; select * from table_name where id=1;
 </code></pre>
@@ -134,7 +134,7 @@ else:
 	连接器会到权限表里面查出用户拥有的权限。之后，这个连接里面的权限判断逻辑，都将依赖于此时读到的权限（所以，一个用户成功建立连接后，即使管理员用户对该用户的权限做了修改，也不会影响已经存在连接的权限。修改完成后，只有再新建的连接才会使用新的权限设置。）
 </code></pre>
 <p>连接成功后，如果没有后续的动作，这个连接就处于空闲状态，可以通过show processlist命令查看。
-<img src="https://justmodesty.github.io//post-images/1561767856385.png" alt="">
+<img src="https://justmodesty.github.io//post-images/1562199788278.webp" alt="">
 Command列显示为&quot;Sleep&quot;表示系统里面有一个空闲连接，如果客户端长时间没动静，连接器就会自动断开（由wait_timeout控制，默认是8小时）。在连接被断开之后，客户端再次发送请求的时候会收到一个错误提醒：Lost connection to MySQL server during query。此时只能重新连接再执行请求。</p>
 <p>关于<strong>长连接</strong>和<strong>短连接</strong>：</p>
 <ul>
