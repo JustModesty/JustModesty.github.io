@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562547803875">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562549177420">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1562547803875" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1562549177420" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -106,7 +106,7 @@
 <li>先了解什么是Sample Sort: <a href="https://en.wikipedia.org/wiki/Samplesort">Wikipedia: Samplesort</a>   <a href="http://parallelcomp.uw.hu/ch09lev1sec5.html">Bucket and Sample Sort</a></li>
 <li><a href="https://www.cnblogs.com/clement-jiao/p/9243066.html">python sort函数内部实现原理</a></li>
 <li>sorted底层用到了Timsort,强烈推荐阅读： <a href="https://www.infopulse.com/blog/timsort-sorting-algorithm/">What is Timsort Algorithm?</a></li>
-<li><a href="https://github.com/python/cpython/blob/master/Objects/listsort.txt">算法说明</a>  <a href="https://github.com/python/cpython/blob/master/Objects/listobject.c">cpython里的源码</a></li>
+<li>有兴趣的甚至可以阅读cpython list源码：<a href="https://github.com/python/cpython/blob/master/Objects/listsort.txt">算法说明</a>  <a href="https://github.com/python/cpython/blob/master/Objects/listobject.c">cpython里的源码</a></li>
 </ol>
 </blockquote>
 <h1 id="先要了解sample-sort-它起源于桶排序">先要了解Sample Sort, 它起源于桶排序</h1>
@@ -190,7 +190,11 @@
 <li>如果其中一个要求不满足，数组Y就和X与Z中最小的数组融合。这个步骤被执行直到两个必要条件都满足或者所有数据都有序。</li>
 <li>对于任何无需考虑的子数组，回到第二步；否则结束本阶段。</li>
 </ol>
-<p><img src="https://justmodesty.github.io//post-images/1562547473402.png" alt=""></p>
+<p>这个过程的目的就是保持平衡，如下图所示：
+<img src="https://justmodesty.github.io//post-images/1562547473402.png" alt="">
+这样之后，子数组的大小就适合进一步的合并了。想象这么一个场景：有一个子数组大小是128，64,32,16,8,4,2和2（暂时先忽略上面提到的子数组的大小要&gt;=minrun这个限制）。在这种情况下，知道最后两个子数组相遇之前，不会有任何的合并。在最后两个子数组相遇之后，将执行七次完美平衡的合并。</p>
+<h4 id="子数组合并">子数组合并</h4>
+<p>这里使用的就是典型的归并排序的合并操作，不过这里做了小小的改进，叫做<strong>galloping</strong>， 在查找合并元素的时候，无须线性查找，可以使用二分查找。</p>
 
             </div>
             
