@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" >
 
-<title>Python的冷知识 | Ji Jun Jie&#39;s Blog</title>
+<title>Python的list与dict的效率和底层 | Ji Jun Jie&#39;s Blog</title>
 <meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1562850686785">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1563152594698">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1562850686785" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1563152594698" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -92,7 +92,7 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">Python的冷知识</h2>
+            <h2 class="post-title">Python的list与dict的效率和底层</h2>
             <div class="post-date">2019-05-15</div>
             
             <div class="post-content">
@@ -141,7 +141,45 @@ empty_list_b = []</li>
 </tbody>
 </table>
 <p>这样会随着哈希表的扩张变得越来越稀疏。导致浪费很多存储空间。
-现在版本的Python哈希表除了字典本身的结构，会把索引和哈希值、键、值 单独分开。</p>
+比如这样：</p>
+<pre><code class="language-python">entries = [
+['--', '--', '--']
+[-230273521, 'dob', '1999-01-01'],
+['--', '--', '--'],
+['--', '--', '--'],
+[1231236123, 'name', 'mike'],
+['--', '--', '--'],
+[9371539127, 'gender', 'male']
+]
+</code></pre>
+<p>现在版本的Python哈希表除了字典本身的结构，会把索引和哈希值、键、值 单独分开。
+变成这样（明显提高了空间利用率）：</p>
+<pre><code>Indices
+----------------------------------------------------
+None | index | None | None | index | None | index ...
+----------------------------------------------------
+
+Entries
+--------------------
+hash0   key0  value0
+---------------------
+hash1   key1  value1
+---------------------
+hash2   key2  value2
+---------------------
+        ...
+---------------------
+</code></pre>
+<p>其中index表示Entries的下标</p>
+<pre><code>indices = [None, 1, None, None, 0, None, 2]
+entries = [
+[1231236123, 'name', 'mike'],
+[-230273521, 'dob', '1999-01-01'],
+[9371539127, 'gender', 'male']
+]
+
+</code></pre>
+<p><strong>值得注意的是，在python3.6中字典无法保证100%有序，而3.7+之后，字典被确定为有序</strong></p>
 <p><strong>插入操作</strong></p>
 <p>每次向字典或集合插入一个元素时，Python会首先计算键的哈希值，再和mask=PyDicMinSize-1做与操作，计算这个元素应该插入哈希表的位置index = hash(key)&amp;mask。</p>
 <pre><code>if 这个位置index是空的：
@@ -161,7 +199,8 @@ else：
 	继续查找，直到找到空位或者抛出异常为止。
 </code></pre>
 <p><strong>删除操作</strong></p>
-<p>Python会暂时对这个位置的元素赋于一个特殊的值，等到重新调整哈希表的大小时，再将其删除。</p>
+<p>Python会暂时对这个位置的元素赋于一个特殊的值，等到重新调整哈希表的大小时，再将其删除。
+为了保证高效性，字典和集合内的哈希表，通常会保证至少留有1/3的剩余空间。随着元素的不断插入，当剩余空间小于1/3时，Python会重新获取更大的内存空间，<strong>扩充哈希表，在这种情况下，表内所有的元素位置都会被重新排放</strong></p>
 
             </div>
             
