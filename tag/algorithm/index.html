@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" >
 
-<title>Python字符串拼接的效率 | Ji Jun Jie&#39;s Blog</title>
+<title>Algorithm | Ji Jun Jie&#39;s Blog</title>
 <meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -91,54 +91,33 @@
 
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
-          <div class="post-detail">
-            <h2 class="post-title">Python字符串拼接的效率</h2>
-            <div class="post-date">2019-06-01</div>
-            
-            <div class="post-content">
-              <pre><code>s = ''
-for n in range(0, 100000):
-    s += str(n)
-</code></pre>
-<p>对于上面这段代码：
-Python2.5以前（不含2.5）时间复杂度为O(1)+O(2)+…+O(n) = O(n^2)
-因为string不可变，每次拼接都是申请新的内存空间来创建新的字符串，效率非常低下。</p>
-<p>Python2.5及以后开始，每次处理字符串的拼接操作时，Python首先会检测str1还有没有其他的引用。如果没有的话，就会尝试原地扩充字符串buffer的大小，而不是重新分配一块内存来创建新的字符串并拷贝。这样的话，上述例子中的时间复杂度就仅为O(n)。</p>
-<pre><code>l = []
-for n in range(0, 100000):
-    l.append(str(n))
-l = ' '.join(l) 
-</code></pre>
-<p>字符串内置的join函数，string.join(iterable)，表示把每个元素都按照指定的格式连接起来。
-由于字符串的操作是O(1),所以这里的复杂度最大是O(1)*n+O(1)*n = O(1)*2n = O(n)，所以这也是线性的复杂度。</p>
-<p>同样是实现了字符串拼接，虽然复杂度同样是O(n)，但根据数量的大小应该选择不同的方法：
-字符串拼接的次数较少的情况，比如range(100)，那么方法一更优，时间复杂度精确来说第一种是O(n)，第二种是O(2n)。
-字符串拼接的次数较多的情况，比如range(99999999)，方法二更快一些，虽然方法二会遍历两次，但实际上join的速度很快，列表append和join的开销比字符串+=小一些。</p>
-
-            </div>
-            
-              <div class="tag-container">
-                
-                  <a href="https://justmodesty.github.io//tag/python" class="tag">
-                    Python
-                  </a>
-                
-              </div>
-            
-            
-              <div class="next-post">
-                <div class="next">下一篇</div>
-                <a href="https://justmodesty.github.io//post/pythontips">
-                  <h3 class="post-title">
-                    Python的list与dict的效率和底层
-                  </h3>
+          <h2 class="current-tag">标签: Algorithm</h2>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://justmodesty.github.io//post/timsort">
+                  <h2 class="post-title">Python排序用的Sorted的底层原理</h2>
                 </a>
+                <div class="post-date">
+                  2019-07-08
+                </div>
+                <div class="post-abstract">
+                  
+                </div>
               </div>
-            
+              
+                <a class="right" href="https://justmodesty.github.io//post/timsort">
+                  <div class="feature-container" style="background-image: url('https://justmodesty.github.io//post-images/timsort.png')">
+                  </div>
+                </a>
+              
+            </article>
+          
 
-            
-
-          </div>
+          <div class="pagination-container">
+  
+  
+</div>
 
         </div>
       </div>
