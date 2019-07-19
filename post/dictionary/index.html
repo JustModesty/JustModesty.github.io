@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>词典---Dict的深入剖析 | Ji Jun Jie&#39;s Blog</title>
+<meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1563531311454">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://justmodesty.github.io/">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1563531311454" class="site-logo">
+        <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于本站
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构
+    </div>
+    <div class="site-footer">
+      a381654728@gmail.com | <a class="rss" href="https://justmodesty.github.io//atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">词典---Dict的深入剖析</h2>
+            <div class="post-date">2019-07-18</div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>参考阅读：清华大学出版社 - 邓俊辉编著 《数据结构(C++语言版)》(第3版) 第9章 词典</p>
+<p>博主之前也写过一篇博客简单介绍了dict，可以先借鉴一下 <a href="https://blog.jijunjie.cn/post/pythontips/">Python的list与dict的效率和底层</a></p>
+<p><strong>本文主要是深入介绍词典，从底层的数据结构来剖析，涉及到的新名词可能会比较多。</strong></p>
+<p>比如 词条(entry)、桶(bucket)、装填因子、懒惰标记等。这些是当初用Python的dict没有去考虑过的东西，现在需要以C++的角度来看待这个问题。</p>
+</blockquote>
+<h1 id="词典dictionary结构">词典(dictionary)结构</h1>
+<p>逻辑上的词典，是由一组数据结构构成的集合，其中各元素都是由<strong>关键码</strong>和<strong>数据项</strong>合成的<strong>词条（entry）</strong>。映射（map）结构与词典结构一样，也是词条的集合。二者的差别仅仅在于，映射要求不同词条的关键码互异，而词典则允许多个词条拥有相同的关键码（备注一下：某些文献中所定义的词典和映射结构，可能与此约定恰好相反）。</p>
+<h2 id="词典结构主要的操作接口">词典结构主要的操作接口</h2>
+<table>
+<thead>
+<tr>
+<th>操作接口</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>get(key)</td>
+<td>若词典中存在以key为关键码的词条，则返回该词条的数据对象；否则，返回Null</td>
+</tr>
+<tr>
+<td>put(key,value)</td>
+<td>插入词条（key，value），并报告是否成功。</td>
+</tr>
+<tr>
+<td>remove（key)</td>
+<td>若词典中存在以key为关键码的词条，则删除之并返回true；否则，返回false</td>
+</tr>
+</tbody>
+</table>
+<p>当然，除了这三个，还有一些其他的，比如int size() 可以返回词条总数。</p>
+<h2 id="实现方式">实现方式</h2>
+<p>​		任何一种平衡二叉搜索树，都可以便捷地实现词典结构。比如Java语言的java.util.TreeMap类即是基于<strong>红黑树</strong>实现的词典结构。然而这类实现方式都在不经意中假设”关键码可以比较大小“，故其所实现的并非严格意义上的词典结构。</p>
+<p>​		以下以<strong>跳转表</strong>和<strong>散列表</strong>为例介绍词典结构的两种实现方式。尽管它们都在底层引入了某种”序“，但这类”序“只是内部的一种约定；从外部接口来看，依然只有”相等“的概念。</p>
+<h3 id="跳转表">跳转表</h3>
+<p>因为词典的底层最终不是选用跳转表，这里只是简单列出跳转表实现的词典的期望复杂度，里面涉及很多数学计算，感兴趣的同学可以查看最上面列出的参考阅读书籍。</p>
+<ul>
+<li>查找：期望时间复杂度O(logn)</li>
+<li>插入：期望时间复杂度O(logn)</li>
+<li>删除：期望时间复杂度O(logn)</li>
+</ul>
+<h3 id="散列表">散列表</h3>
+<p>​        散列表以最基本的向量作为底层支撑结构，通过适当的散列函数在词条的关键码与向量单元的秩之间建立起映射关系。理论分析和实验统计均表明，只要<strong>散列表</strong>、<strong>散列函数</strong>以及<strong>冲突排解策略</strong>设计得当，散列技术可在期望的常数时间内实现词典的所有接口操作。也就是说，**就平均时间复杂度的意义而言，可以使这些操作所需的运行时间与词典的规模基本无关。（为什么说是平均时间复杂度呢？因为涉及到----扩容！）**尤为重要的是，散列技术完全摒弃了”关键码有序“的先决条件，故就实现词典结构而言，散列所特有的通用性和灵活性是其他方式无法比拟的。</p>
+<p>​        散列表（hashtable）是散列方法的底层基础，逻辑上由一系列可存放词条（或其引用）的单元组成，故这些单元也称作桶（bucket）或桶单元；与之对应地，各桶单元也应按其逻辑次序在物理上连续排列。因此，这种线性的底层结构用向量来实现再自然不过了。为简化实现并进一步提高效率，往往直接使用数组，此时的散列表亦称作桶数组（bucket array）。若桶数组的容量为R，则其中合法秩的区间[0,R)也称作地址空间(address space)。</p>
+<h3 id="装填因子">装填因子</h3>
+<p>一个问题：某课堂的所有学生中，是否有某两位生日(birthday, not date of birth)相同？这种情况也称作生日巧合。那么，发生生日巧合时间的概率是多少</p>
+<p>​		若将全年各天视作365个桶，并将学生视作词条，则可按生日将他们组织为散列表。如此，上述问题便可表述为：若长度为365的散列表中存有n个词条，则至少发生一次冲突的概率P<sub>365</sub>(n)有多大？</p>
+<p>不难证明，只要学生n&gt;=23,即有P<sub>365</sub>&gt;50%。请注意，此时的装填因子=23/365 = 6.3%   <strong>非常低!!!</strong></p>
+<p>所以，对于更长的散列表，只需要更低的装填因子，即有50%的概率会发生一次冲突。鉴于实际问题中散列表的长度M往往远大于365，故”不会发生冲突“几乎不可能。</p>
+<h3 id="解决冲突的方法">解决冲突的方法</h3>
+<h4 id="开散列策略">开散列策略</h4>
+<p>需要引入次级关联结构，实现相关算法的代码自身的复杂成都和出错概率会大大增加。对于稍大规模的词条集，查找过程中将需要做更多的I/O操作。 这种结构叫做<strong>封闭定址(closed addressing)<strong>或</strong>开散列（open hashing）</strong></p>
+<h5 id="多槽位multiple-slots法">多槽位(multiple slots)法</h5>
+<p>最直接了当的一种对策是，将彼此冲突的每一组词条组织为一个小规模的子词典，分别存放与它们共同对应的桶单元中。比如一种简便的方法是：统一将各桶细分为更小的称作槽位(slot)的若干单元，每一组槽位可组织为向量或列表。</p>
+<p>缺点：绝大多数的槽位通常都处于空闲状态。准确地将，若每个桶被细分为k个槽位，则当散列表总共存有N个词条时，装填因子=N/(kM)    降为之前的1/k  ...而且很难确定槽位分到何种细度，可能有的比较极端的会溢出。</p>
+<h5 id="独立链seperate-chaining法">独立链(seperate chaining)法</h5>
+<p>就是通常所说的拉链法，这个就不用介绍了。</p>
+<h5 id="公共溢出区overflow-area法">公共溢出区(overflow area)法</h5>
+<p>在原散列表之外另设一个词典结构D<sub>overflow</sub>，一旦在插入词条时发生冲突就将该词条转存至D<sub>overflow</sub>中。就效果而言，D<sub>overflow</sub>相当于一个存放冲突词条的公共缓冲池。</p>
+<p>优点：构思简单、易于实现，在冲突不甚频繁场合是一种好选择。同时，既然公共溢出区本身也是一个词典结构，可以套用现有的任何一种实现方式，因此就整体结构而言，此时的散列表也可理解为是一种递归形式的散列表。</p>
+<h4 id="闭散列策略">闭散列策略</h4>
+<p>仅仅依靠散列表结构，就地排解冲突。也就是说，若新词条与已有词条冲突，则只允许在散列表内部为其寻找另外一个空桶。如此，各桶并非注定只能存放特定的一组词条；从理论上讲，每个桶单元都有可能存放任一词条。因为散列地址空间对所有词条开放，故这一新的策略亦称作<strong>开放地址（open addressing)</strong>；同时，因可用的散列地址仅限于散列表锁覆盖的范围之内，故亦称作<strong>闭散列(closed hashing)</strong>。</p>
+<h5 id="线性探测linear-probing法">线性探测(linear probing)法</h5>
+<p>找若发现桶单元ht[hash(key)]已被占用，则转而试探桶单元ht[hash(key)+1]..ht[hash(key)+2]...如此不断，直到发现一个可用的空桶。当然，为确保桶地址的合法，最后还需统一对M取模。因此准确的说，第i次试探的桶单元应为：ht[(hash(key)+i)modM], i=1,2,3....</p>
+<p>被试探的桶单元在物理空间上依次连贯，其地址构成等差数列，故因此得名。</p>
+<h6 id="查找链">查找链</h6>
+<p>线性探测法冲突之后进行查找的连续的桶单元，组成查找链</p>
+<h6 id="懒惰删除">懒惰删除</h6>
+<p>查找链中任何一环的缺失，都会导致后续词条因无法抵达而丢失，表现为有时无法找到实际已存在的词条。因此若采用开放定址策略，则在执行删除操作时，需同时做特别的调整。</p>
+<p>为保持查找链的完整，一种直观的构想是将后续词条悉数取出然后重新插入（导致删除操作的复杂度很高！！！）</p>
+<p>解决方案是：为每个桶另设一个标志位，指示该桶尽管目前为空，但此前确曾存放过词条。需要特别说明的是，此后不必清除该桶的懒惰删除标志。</p>
+<h5 id="更多的闭散列策略">更多的闭散列策略</h5>
+<ul>
+<li>
+<p>平方试探(quadratic probing)法</p>
+<p>是否会出现散列表有空桶，但是无法抵达的情况？</p>
+<p>只要散列表长度M为素数且装填因子&lt;=50%，则平方试探迟早必将终止于某个空桶。</p>
+</li>
+<li>
+<p>伪随机试探(pseudo-random probing)法</p>
+</li>
+<li>
+<p>再散列(double hashing)法</p>
+</li>
+</ul>
+<h2 id="关于装填因子">关于装填因子</h2>
+<p>理论分析和实验统计均一致表明，只要能将装填因子控制在适当范围之内，闭散列策略的平均效率，通常都可保持在较为理想的水平。比如，一般的建议是保持装填因子&lt;0.5 。这一原则也适用于其他的定址策略，比如对独立链法而言，建议的装填因子上限为0.9。</p>
+<h2 id="关于重散列">关于重散列</h2>
+<p>当插入操作导致装填因子高于50%后，要进行重散列。</p>
+<ul>
+<li>采取“逐一取出再插入”的朴素策略，对通数组扩容</li>
+<li>不可简单地通过mercpy() 等复制方法将原通数组复制到新桶数组，否则存在两个问题
+<ul>
+<li>会继承原有冲突</li>
+<li>可能导致查找链在后端断裂----即便为所有扩充桶设置懒惰删除标记也无济于事</li>
+</ul>
+</li>
+</ul>
+<p>重散列的效果，只不过是将原词条集，整体“搬迁”至容量至少加倍的新散列表中。与可扩充向量同理，这一策略也可使重散列锁耗费的时间，在分摊至各次操作后可以忽略不计。</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://justmodesty.github.io//tag/python" class="tag">
+                    Python
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/timsort">
+                  <h3 class="post-title">
+                    Python排序用的Sorted的底层原理
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
