@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://justmodesty.github.io/</id>
     <title>Ji Jun Jie&apos;s Blog</title>
-    <updated>2019-07-19T12:05:09.076Z</updated>
+    <updated>2019-07-21T06:59:04.015Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://justmodesty.github.io/"/>
     <link rel="self" href="https://justmodesty.github.io//atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://justmodesty.github.io//images/avatar.png</logo>
     <icon>https://justmodesty.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Ji Jun Jie&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[锁问题---多处理机系统(自旋锁、RCU锁等等)]]></title>
+        <id>https://justmodesty.github.io//post/multisystemlock</id>
+        <link href="https://justmodesty.github.io//post/multisystemlock">
+        </link>
+        <updated>2019-07-21T06:57:11.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[词典---Dict的深入剖析]]></title>
         <id>https://justmodesty.github.io//post/dictionary</id>
@@ -72,12 +79,5 @@
         <link href="https://justmodesty.github.io//post/isolation">
         </link>
         <updated>2019-06-29T08:59:38.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[MySQL日志系统]]></title>
-        <id>https://justmodesty.github.io//post/logsys</id>
-        <link href="https://justmodesty.github.io//post/logsys">
-        </link>
-        <updated>2019-06-05T05:06:16.000Z</updated>
     </entry>
 </feed>
