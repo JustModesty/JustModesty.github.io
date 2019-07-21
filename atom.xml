@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://justmodesty.github.io/</id>
     <title>Ji Jun Jie&apos;s Blog</title>
-    <updated>2019-07-15T01:04:13.926Z</updated>
+    <updated>2019-07-19T12:05:09.076Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://justmodesty.github.io/"/>
     <link rel="self" href="https://justmodesty.github.io//atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://justmodesty.github.io//images/avatar.png</logo>
     <icon>https://justmodesty.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Ji Jun Jie&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[词典---Dict的深入剖析]]></title>
+        <id>https://justmodesty.github.io//post/dictionary</id>
+        <link href="https://justmodesty.github.io//post/dictionary">
+        </link>
+        <updated>2019-07-18T07:01:39.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Python排序用的Sorted的底层原理]]></title>
         <id>https://justmodesty.github.io//post/timsort</id>
@@ -72,12 +79,5 @@
         <link href="https://justmodesty.github.io//post/logsys">
         </link>
         <updated>2019-06-05T05:06:16.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[mysql基础架构]]></title>
-        <id>https://justmodesty.github.io//post/process</id>
-        <link href="https://justmodesty.github.io//post/process">
-        </link>
-        <updated>2019-06-04T04:44:52.000Z</updated>
     </entry>
 </feed>
