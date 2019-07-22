@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1563692339715">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1563757362170">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1563692339715" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1563757362170" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -105,7 +105,7 @@
 <h3 id="自旋锁的起源">自旋锁的起源</h3>
 <p>在<strong>单CPU系统</strong>中，CPU在执行 “读—修改—写“  原语操作时，是具有原子性的，即在执行这些操作时不会被中断。保证原子性的基本方法是，在执行原语之前关中断，完成后再开中断。</p>
 <p>但是，在<strong>对称多处理机系统</strong>中，CPU在执行”读—修改—写“原语时，已不能再保证其操作的原子性。因为CPU所执行的 “读—修改—写” 原语操作通常都包含了若干条指令，因此需要执行多次总线操作。</p>
-<p>而在多处理机系统中，总线往往又是由多个处理机共享，它们是通过竞争来获取总线的。如果某CPU在执行原语的过程中由其他CPU争得了总线，就可能会导致该CPU与其他CPU对同一存储单元 “读—写” 操作的交叉，造成混乱。**因此，在多处理机系统中，还必须引入对总线实现互斥的机制。**于是，自旋锁机制就应运而生，并已大量应用于对总线资源的竞争。当然，自旋锁机制并不局限于对总线资源的竞争。</p>
+<p>而在多处理机系统中，总线往往又是由多个处理机共享，它们是通过竞争来获取总线的。如果某CPU在执行原语的过程中由其他CPU争得了总线，就可能会导致该CPU与其他CPU对同一存储单元 “读—写” 操作的交叉，造成混乱。<strong>因此，在多处理机系统中，还必须引入对总线实现互斥的机制</strong>。于是，自旋锁机制就应运而生，并已大量应用于对总线资源的竞争。当然，自旋锁机制并不局限于对总线资源的竞争。</p>
 <h3 id="实现对总线互斥访问的方法">实现对总线互斥访问的方法</h3>
 <p>利用自旋锁实现对总线互斥访问的方法是：在总线上设置一个自旋锁，该锁最多只能被一个<strong>内核进程</strong>持有。当一个内核进程需要使用总线，对某个存储单元进行读写访问时，先请求自旋锁，以获得对总线的使用权。如果该锁被占用，那么这个进程就会一直进行“旋转”，循环测试锁的状态，直到自旋锁重新可用。如果锁未被占用，请求该锁的内核进程便能立刻得到它，并且继续执行，直到完成对指定存储单元的读写操作后，释放该锁。</p>
 <h3 id="自旋锁的作用">自旋锁的作用</h3>
