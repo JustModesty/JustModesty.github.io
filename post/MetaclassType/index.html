@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>浅谈Python中的metaclass与type | Ji Jun Jie&#39;s Blog</title>
+<meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1563963183758">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://justmodesty.github.io/">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1563963183758" class="site-logo">
+        <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于本站
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构
+    </div>
+    <div class="site-footer">
+      a381654728@gmail.com | <a class="rss" href="https://justmodesty.github.io//atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">浅谈Python中的metaclass与type</h2>
+            <div class="post-date">2019-07-24</div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>写在最前，本文是博主在学习期间阅读多番资料后的笔记，在此仅作学习笔记。</p>
+<p>参考阅读:</p>
+<ol>
+<li>
+<p><a href="https://realpython.com/python-metaclasses/#new-style-classes">Python Metaclasses</a></p>
+</li>
+<li>
+<p>极客时间付费专栏《Python核心与实战》第18讲 <a href="https://time.geekbang.org/column/article/101288">metaclass,是潘多拉魔盒还是阿拉丁神灯</a></p>
+</li>
+</ol>
+</blockquote>
+<h2 id="误区">误区</h2>
+<p>metaclass从字面意思理解，meta是“元”，很容易联想到“本源”、“基本”的意思，所以“元类”容易让人以为是“基本类”。难道Python的metaclass指的是Python2的Object吗？</p>
+<p>回答: No!!</p>
+<h3 id="正确解答">正确解答</h3>
+<p>meta-class的meta这个词根，起源与希腊语词汇meta，包含下面两种意思：</p>
+<ol>
+<li>“Beyond”，例如技术词汇metadata，意思是描述数据的超越数据；</li>
+<li>“Change&quot;，例如技术词汇metamorphosis，意思是改变的形态。</li>
+</ol>
+<p>metaclass，一如其名，实际上同时包含了**“超越类”<strong>和</strong>“变形类”**的含义，完全不是“基本类”的意思。</p>
+<p>所以，要深入理解metaclass，我们就要围绕<strong>超越变形</strong>特性。</p>
+<p>三个主题：</p>
+<ul>
+<li>metaclass有什么用？</li>
+<li>metaclass如何应用？</li>
+<li>Python语言设计层面如何实现metaclass？</li>
+</ul>
+<h2 id="1-metaclass有什么用">1. metaclass有什么用？</h2>
+<p>metaclass能够拦截Python类的定义</p>
+<h2 id="2-metaclass如何应用">2. metaclass如何应用？</h2>
+<p>这里直接引用</p>
+<blockquote>
+<p>极客时间付费专栏《Python核心与实战》第18讲 <a href="https://time.geekbang.org/column/article/101288">metaclass,是潘多拉魔盒还是阿拉丁神灯</a></p>
+</blockquote>
+<p>的一个例子，该文章的博主使用YAML的源码来讲解metaclass的应用场景，我觉得挺不错的.</p>
+<pre><code class="language-python"># Python 2/3 相同部分
+class YAMLObjectMetaclass(type):
+    def __init__(cls, name, bases, kwds):
+        super(YAMLObjectMetaclass, cls).__init__(name, bases, kwds)
+        if 'yaml_tag' in kwds and kwds['yaml_tag'] is not None:
+            cls.yaml_loader.add_constructor(cls.yaml_tag, cls.from_yaml)
+    # 省略其余定义
+
+
+# Python 3
+class YAMLObject(metaclass=YAMLObjectMetaclass):
+    yaml_loader = Loader
+    # 省略其余定义
+
+
+# Python 2
+class YAMLObject(object):
+    __metaclass__ = YAMLObjectMetaclass
+    yaml_loader = Loader
+    # 省略其余定义
+</code></pre>
+<p>上面的代码不管是Python2还是Python3，YAMLObject都把metaclass声明成了YAMLObjectMetaclass。</p>
+<p>在YAMLObjectMetaclass中，下面这行代码就是魔法发生的地方：</p>
+<pre><code class="language-python">cls.yaml_loader.add_constructor(cls.yaml_tag, cls.from_yaml) 
+</code></pre>
+<p>YAML应用metaclass，拦截了所有YAMLObject子类的定义。也就是说，在用户定义任何YAMLObject子类时，Python会强行插入运行上面那行海马，所以YAML的使用者无需自己手动去写add_construtor(Foo)</p>
+<h2 id="3-python底层语言设计层面如何实现metaclass的">3. Python底层语言设计层面如何实现metaclass的？</h2>
+<p>要理解metaclass的底层原理，需要首先深入理解Python类型模型。</p>
+<ul>
+<li>
+<p>第一，所有Python的用户定义类，都是type这个类的实例。</p>
+<ul>
+<li>
+<pre><code class="language-python">class MyClass:
+    pass
+type(MyClass) #会输出&lt;class 'type'&gt;
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>第二，用户自定义类，不过是type类的 __call__ 运算符重载。</p>
+<ul>
+<li>
+<p>所有自定义的类，其实就是class = type(classname, superclasses, attributedict)</p>
+</li>
+<li>
+<p>它会进一步调用:</p>
+</li>
+<li>
+<p>type.__new__(typeclass,classname,superclasses,attributedict)</p>
+</li>
+<li>
+<p>type.__init__(class, classname,superclasses,attributedict)</p>
+</li>
+<li>
+<pre><code class="language-python"># 例子如下
+class MyClass:
+  data = 1
+  
+instance = MyClass()
+MyClass, instance
+# 输出
+(__main__.MyClass, &lt;__main__.MyClass instance at 0x7fe4f0b00ab8&gt;)
+instance.data
+# 输出
+1
+
+MyClass = type('MyClass', (), {'data': 1})
+instance = MyClass()
+MyClass, instance
+# 输出
+(__main__.MyClass, &lt;__main__.MyClass at 0x7fe4f0aea5d0&gt;)
+
+instance.data
+# 输出
+1
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>第三，metaclass是type的子类，通过替换type的 __call__ 运算符重载机制，”超越变形“正常的类。</p>
+<ul>
+<li>
+<p>一旦把一个类型MyClass的metaclass设置成MyMeta,MyClass就不再由原生的type创建，而是会调用MyMeta的__call__运算符重载。</p>
+<ul>
+<li>
+<pre><code class="language-python"># 例子如下
+class = type(classname, superclasses, attributedict) 
+# 变为了
+class = MyMeta(classname, superclasses, attributedict)
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="一个例子理清typemetaclass等生成的类的执行顺序">一个例子，理清type,metaclass等生成的类的执行顺序</h2>
+<pre><code class="language-python">class Mymeta(type):
+    def __init__(self, name, bases, dic):
+        super().__init__(name, bases, dic)
+        print('===&gt;Mymeta.__init__')
+        print(self.__name__)
+        print(dic)
+        print(self.yaml_tag)
+
+    def __new__(cls, *args, **kwargs):
+        print('===&gt;Mymeta.__new__')
+        print(cls.__name__)
+        return type.__new__(cls, *args, **kwargs)
+
+    def __call__(cls, *args, **kwargs):
+        print('===&gt;Mymeta.__call__')
+        obj = cls.__new__(cls)
+        cls.__init__(cls, *args, **kwargs)
+        return obj
+
+
+class Foo(metaclass=Mymeta):
+    yaml_tag = '!Foo'
+
+    def __init__(self, name):
+        print('Foo.__init__')
+        self.name = name
+
+    def __new__(cls, *args, **kwargs):
+        print('Foo.__new__')
+        return object.__new__(cls)
+
+
+foo = Foo('foo')
+
+# ==========以下是输出========================================
+===&gt;Mymeta.__new__
+Mymeta
+===&gt;Mymeta.__init__
+Foo
+{'yaml_tag': '!Foo', '__qualname__': 'Foo', '__module__': '__main__', '__new__': &lt;function Foo.__new__ at 0x7fb8594ccae8&gt;, '__init__': &lt;function Foo.__init__ at 0x7fb8594cca60&gt;}
+!Foo
+===&gt;Mymeta.__call__
+Foo.__new__
+Foo.__init__
+# ===========================================================
+</code></pre>
+<p>总结：</p>
+<ol>
+<li>如果类Foo使用了metaclass，则先初始化metaclass</li>
+<li>初始化metaclass的时候先进行__new__(cls, *args, **kwargs)，但是要返回type.__new__(cls, *args, **kwargs)</li>
+<li>new完了metaclass,要进行metaclass的__init__(self, name, bases, dic),关键点是super().__init__(name, bases,dic)  因为Mymeta是继承是type的，所以要使用type(classname, superclasses, attributedict) 生成这个Mymeta，所以要使用父类的__init__方法</li>
+<li>创建完metaclass后，调用类Foo('foo') .不管有没有参数，只要Foo带了括号（），就一定会去找__call__这个方法，而这个方法存在于父类，所以去父类里找。调用的时候要记得重载__new__和__init__初始化生成Foo</li>
+</ol>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://justmodesty.github.io//tag/python" class="tag">
+                    Python
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/multisystemlock">
+                  <h3 class="post-title">
+                    锁问题---多处理机系统(自旋锁、RCU锁等等)
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
