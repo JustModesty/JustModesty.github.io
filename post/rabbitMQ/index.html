@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>rabbitMQ学习笔记 | Ji Jun Jie&#39;s Blog</title>
+<meta name="description" content="交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1564128506331">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://justmodesty.github.io/">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1564128506331" class="site-logo">
+        <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于本站
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      交流分享大后端知识～包括不限于Python/Golang/Linux/数据库/网络安全/操作系统/分布式架构
+    </div>
+    <div class="site-footer">
+      a381654728@gmail.com | <a class="rss" href="https://justmodesty.github.io//atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">rabbitMQ学习笔记</h2>
+            <div class="post-date">2019-07-26</div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>写在最前：本文是博主看官方文档教程的学习笔记，记录得比较粗糙，是边看边记录的，仅为了以后临时查阅的时候可以Ctrl+F找到关键词方便回忆。这篇文章写得真滴非常非常粗糙....建议感兴趣的同学直接去参考链接学习</p>
+<p>参考资料： <a href="https://www.rabbitmq.com/getstarted.html">RabbitMQ Tutorials</a></p>
+</blockquote>
+<p>查看RabbitMQ有哪些队列，以及队列中多少消息在里面：</p>
+<pre><code class="language-bash">sudo rabbitmqctl list_queues
+</code></pre>
+<h2 id="生产者">生产者</h2>
+<pre><code class="language-python">channel.basic_publish(exchange='',
+                      routing_key='hello',
+                      body='Hello World!')
+print(&quot; [x] Sent 'Hello World!'&quot;)
+</code></pre>
+<p>其中，routing_key指定消息要传送到哪个特定的消息队列</p>
+<pre><code class="language-python">channel.basic_publish(exchange='',
+                      routing_key=&quot;task_queue&quot;,
+                      body=message,
+                      properties=pika.BasicProperties(
+                         delivery_mode = 2, # make message persistent
+                      ))
+</code></pre>
+<p>其中，delivery_mode属性指定为2，就是让消息持久化。确保task_queue队列不会丢失（即使RabbitMQ重启）。</p>
+<p>需要注意的是，标记消息持久化不能完全保证消息不会丢失。尽管它告诉RabbitMQ要保存消息到磁盘上，也仍然有一小段时间很特殊，RabbitMQ已经接收到了消息，但是还没有保存到磁盘。同时，RabbitMQ不会对每一个消息都做fsync(2)---它可能只是保存到缓存上，并没有真正的写到磁盘上。这个持久化并不强壮，但是它对我们简单的任务队列来说已经足够了。如果想要更强大的保障，需要使用<a href="https://www.rabbitmq.com/confirms.html">publisher confirms</a>.</p>
+<h2 id="消费者">消费者</h2>
+<pre><code class="language-python">channel.basic_qos(prefetch_count=1)
+</code></pre>
+<p>上面这句，如果worker里有未处理完的任务，则不接受新任务。</p>
+<p>使用消息ack和prefetch_count可以建立工作队列。这个持久化选项让任务存活（即使RabbitMQ重启了）。</p>
+<h2 id="交易所">交易所</h2>
+<p>交易所的不同类型有：direct、 topic、 headers、 fanout</p>
+<p>列出服务器上的交易所：</p>
+<pre><code class="language-bash">sudo rabbitmqctl list_exchanges
+# 会有很多amq.*开头的交易所，以及默认的（无名）的交易所。这些都是默认生成的。
+</code></pre>
+<pre><code class="language-python">import sys
+
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+channel = connection.channel()
+
+channel.queue_declare(queue='task_queue', durable=True)
+
+message = ' '.join(sys.argv[1:]) or &quot;Hello World!&quot;
+channel.basic_publish(exchange='',
+                      routing_key='task_queue',
+                      body=message,
+                      properties=pika.BasicProperties(
+                          delivery_mode=2,  # make message persistent
+                      ))
+
+print(&quot; [x] Sent %r&quot; % message)
+
+connection.close()
+
+# 在这个之前的代码中，交易所exchange=''，这个空参数指派了默认或者无名的交易所：消息被路由到指定的队列（由routing_key指定，如果routing_key存在的话）
+</code></pre>
+<pre><code class="language-python"># 这句代码可以让Rabbit生成一个带有随机名字的队列，以后通过result.method.queue可以获得这个随机队列的名字。这个名字的形式可能是：amq.gen-JzTY20BRgKO-HjmUJj0wLg
+result = channel.queue_declare(queue='')
+# 另外，一旦消费者连接被关闭了，这个队列应该要删除。可以使用exclusive标记来完成这个。
+result = channel.queue_declare(queue='', exclusive=True)
+</code></pre>
+<pre><code class="language-python"># 交易所和队列之间的关系称为 binding
+channel.queue_bind(exchange='logs',
+                   queue=result.method.queue)
+# 上面这个代码执行之后，叫做&quot;logs&quot;的这个交易所就会添加消息到队列中。
+</code></pre>
+<pre><code class="language-bash"># 列出绑定关系
+sudo rabbitmqctl list_bindings
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://justmodesty.github.io//tag/oXKDgsQe0" class="tag">
+                    MQ
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://justmodesty.github.io//post/MetaclassType">
+                  <h3 class="post-title">
+                    浅谈Python中的metaclass与type
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

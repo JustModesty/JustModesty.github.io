@@ -9,7 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1563537905266">
+<link rel="shortcut icon" href="https://justmodesty.github.io//favicon.ico?v=1564128506331">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://justmodesty.github.io//styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://justmodesty.github.io/">
-        <img src="https://justmodesty.github.io//images/avatar.png?v=1563537905266" class="site-logo">
+        <img src="https://justmodesty.github.io//images/avatar.png?v=1564128506331" class="site-logo">
         <h1 class="site-title">Ji Jun Jie&#39;s Blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
@@ -96,7 +96,11 @@
             <div class="post-date">2019-05-15</div>
             
             <div class="post-content">
-              <ol>
+              <blockquote>
+<p>参考阅读:Python 3.7 的list源码<a href="https://github.com/python/cpython/blob/949fe976d5c62ae63ed505ecf729f815d0baccfc/Include/listobject.h#L23">listobject.h</a>        、<a href="https://github.com/python/cpython/blob/3d75bd15ac82575967db367c517d7e6e703a6de3/Objects/listobject.c#L33">listobject.c</a>
+tuple源码<a href="https://github.com/python/cpython/blob/3d75bd15ac82575967db367c517d7e6e703a6de3/Include/tupleobject.h#L25">tupleobject.h</a>  、<a href="https://github.com/python/cpython/blob/3d75bd15ac82575967db367c517d7e6e703a6de3/Objects/tupleobject.c#L16">tupleobject.c</a></p>
+</blockquote>
+<ol>
 <li>创建空列表的效率的区别
 empty_list_a = list()
 empty_list_b = []</li>
@@ -104,7 +108,41 @@ empty_list_b = []</li>
 <ul>
 <li>empty_list_a是来自一个函数调用，Python的function call会创建stack，并进行一系列参数检查的操作，消耗比较大。</li>
 <li>empty_list_b来自一个内置的C函数，可以直接被调用，效率更高。</li>
+<li>list的底层C是怎么分配的？</li>
 </ul>
+<pre><code class="language-c">#ifndef Py_LIMITED_API
+typedef struct {
+    PyObject_VAR_HEAD
+    /* Vector of pointers to list elements.  list[0] is ob_item[0], etc. */
+    PyObject **ob_item;
+
+    /* ob_item contains space for 'allocated' elements.  The number
+     * currently in use is ob_size.
+     * Invariants:
+     *     0 &lt;= ob_size &lt;= allocated
+     *     len(list) == ob_size
+     *     ob_item == NULL implies ob_size == allocated == 0
+     * list.sort() temporarily sets allocated to -1 to detect mutations.
+     *
+     * Items must normally not be NULL, except during construction when
+     * the list is not yet visible outside the function that builds it.
+     */
+    Py_ssize_t allocated;
+} PyListObject;
+#endif
+</code></pre>
+<p>可见是一个过度allocate的数组。</p>
+<ul>
+<li>拓展一下tuple的C内部</li>
+</ul>
+<pre><code>#include &quot;clinic/tupleobject.c.h&quot;
+
+/* Speed optimization to avoid frequent malloc/free of small tuples */
+#ifndef PyTuple_MAXSAVESIZE
+#define PyTuple_MAXSAVESIZE     20  /* Largest tuple to save on free list */
+#endif
+</code></pre>
+<p>可见在tuple的大小不超过20的时候，Python就会把它缓存在一个内部的free list中。这样，如果以后需要再去创建同样的tuple，Python就可以直接从缓存中载入，提高了程序运行效率。</p>
 <ol start="2">
 <li>在Python3.7+，字典被确定为有序（在3.6中，字典有序是一个implementation detail，在3.7才正式成为语言特性，因此3.6中无法100%保证有序性），3.6之前是无序的。</li>
 <li>字典和集合的工作原理（哈希表是怎样存储的）
